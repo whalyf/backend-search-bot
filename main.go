@@ -12,7 +12,8 @@ import (
     "github.com/gorilla/handlers"
     "github.com/gorilla/mux"
 		"github.com/joho/godotenv"
-		// g "github.com/serpapi/google-search-results-golang"
+    "github.com/resend/resend-go/v2"
+		g "github.com/serpapi/google-search-results-golang"
 )
 
 func main() {
@@ -46,26 +47,64 @@ func handleProcessRequest(w http.ResponseWriter, r *http.Request) {
     }
 
     processedResults := processNestJSData(searchParams)
-  	// Check if "keywords" exists in processedResults
 		keywords, ok := processedResults["keywords"].(string)
 		if !ok {
-				http.Error(w, "Keywords not found or not a string", http.StatusInternalServerError)
+				http.Error(w, "Keywords not found", http.StatusInternalServerError)
 				return
 		}
+
 		email, ok := processedResults["email"].(string)
 		if !ok {
-				http.Error(w, "Email not found or not a string", http.StatusInternalServerError)
+				http.Error(w, "Email not found", http.StatusInternalServerError)
 				return
 		}
+    // BUSCA É INVOCADA UTILIZANDO SERP_API
+    searchResult := searchOnGoogle(keywords)
+    // JSON DE RESPOSTA É CONVERTIDO EM HTML
+    htmlFormat := prettyPrintHTML(searchResult)
 
-		// Call searchOnGoogle with the keywords
-		results:= searchOnGoogle(keywords, email)
-		fmt.Println(results)
+    // EMAIL ENVIADO COM O HTMLJSON DA BUSCA
+    sendEmail(email, htmlFormat)
+
     w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(results)
+    json.NewEncoder(w).Encode(searchResult)
 }
 
-func searchOnGoogle(keywords string, email string) map[string]string{
+func sendEmail(email string, prettyJSON string) {
+  client := resend.NewClient(os.Getenv("RESEND_API_KEY"))
+
+  params := &resend.SendEmailRequest{
+      From:    "Google Search Digger <google-digger@resend.dev>",
+      To:      []string{email},
+      Html:    fmt.Sprintf("<div>%s</div>", prettyJSON),
+      Subject: "Resultado das buscas",
+  }
+
+  _, err := client.Emails.Send(params)
+  if err != nil {
+      fmt.Println(err.Error())
+      return
+  }
+}
+
+func prettyPrintHTML(data interface{}) string {
+  // Convert data to JSON string
+  jsonData, err := json.MarshalIndent(data, "", "  ")
+  if err != nil {
+      fmt.Fprintf(os.Stderr, "Error JSON: %v\n", err)
+      return ""
+  }
+
+  prettyJSON := strings.ReplaceAll(string(jsonData), " ", "&nbsp;")
+  prettyJSON = strings.ReplaceAll(prettyJSON, "\n", "<br/>")
+
+  prettyJSON = strings.ReplaceAll(prettyJSON, "<br/>{", "<br/>&nbsp;&nbsp;{")
+  prettyJSON = strings.ReplaceAll(prettyJSON, "<br/>&nbsp;&nbsp;}", "<br/>}")
+
+  return prettyJSON
+}
+
+func searchOnGoogle(keywords string) map[string]interface{}{
 	parameter := map[string]string{
     "api_key": os.Getenv("SERPAPI_KEY"),
     "engine": "google",
@@ -75,17 +114,17 @@ func searchOnGoogle(keywords string, email string) map[string]string{
     "gl": "br",
     "hl": "pt",
   }
-  // search := g.NewGoogleSearch(parameter, os.Getenv("SERPAPI_KEY"))
-  // results, err := search.GetJSON()
+  search := g.NewGoogleSearch(parameter, os.Getenv("SERPAPI_KEY"))
+  results, err := search.GetJSON()
 
-	// fmt.Println(err)
-	return parameter
+	fmt.Println(err)
+	return results
 }
 
 func processNestJSData(searchParams map[string]interface{}) map[string]interface{} {
     return map[string]interface{}{
-        "location":  searchParams["location"],
-        "frequency": searchParams["frequency"],
+        // "location":  searchParams["location"],
+        // "frequency": searchParams["frequency"],
         "email": searchParams["email"],
         "keywords":  toUpperCase(searchParams["keywords"].(string)),
         "dateTime":  time.Now().Format(time.RFC3339),
