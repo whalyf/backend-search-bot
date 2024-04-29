@@ -1,4 +1,5 @@
-package handler
+package main // TO LOCAL DEV
+//package handler  TO VERCEL
 
 import (
     "encoding/json"
