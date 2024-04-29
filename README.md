@@ -8,7 +8,7 @@ $ go run main.go
 ```
 
 # API
-[backend-search-bot.vercel.app](https://backend-search-bot.vercel.app/)
+[backend-search-bot.vercel.app](https://backend-search-bot.vercel.app/api/main)
 
 - Limited requests to SERP_API and RESEND_API
 

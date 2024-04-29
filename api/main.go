@@ -43,7 +43,7 @@ func main() {
 }
 
 func Greetings(w http.ResponseWriter, r *http.Request) {
-  fmt. Fprintf(w, "<div><h1>Welcome to Google Digger GolangApi</h1><span>Código Fonte: <a href='https://github.com/whalyf/backend-search-bot'>Aqui!</a></span></div>")
+  fmt. Fprintf(w, "<div><h1>Welcome to Google Digger GolangApi</h1><span>Código Fonte: <a target='_blank' href='https://github.com/whalyf/backend-search-bot'>Aqui!</a></span></div>")
 }
 
 func HandleProcessRequest(w http.ResponseWriter, r *http.Request) {
