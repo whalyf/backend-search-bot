@@ -24,7 +24,8 @@ func main() {
 		}
 
     // Register the handler for the "/process" endpoint with Gorilla Mux
-    router.HandleFunc("/process", handleProcessRequest).Methods("POST")
+    router.HandleFunc("/process", HandleProcessRequest).Methods("POST")
+    router.HandleFunc("/", Greetings).Methods("GET")
 
     corsHandler := handlers.CORS(
         handlers.AllowedHeaders([]string{"Content-Type"}),
@@ -33,12 +34,17 @@ func main() {
     )
 
     // Wrap your router with the CORS middleware
+    http.Handle("/process", corsHandler(router))
     http.Handle("/", corsHandler(router))
 
-    log.Fatal(http.ListenAndServe(":8080", nil))
+    log.Fatal(http.ListenAndServe(":8080", router))
 }
 
-func handleProcessRequest(w http.ResponseWriter, r *http.Request) {
+func Greetings(w http.ResponseWriter, r *http.Request) {
+  fmt. Fprintf(w, "<div><h1>Welcome to Google Digger GolangApi</h1><span>Código Fonte: <a href='https://github.com/whalyf/backend-search-bot'>Aqui!</a></span></div>")
+}
+
+func HandleProcessRequest(w http.ResponseWriter, r *http.Request) {
     var searchParams map[string]interface{}
     err := json.NewDecoder(r.Body).Decode(&searchParams)
     if err != nil {
