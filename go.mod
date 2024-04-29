@@ -1,4 +1,4 @@
-module bot
+module github.com/whalyf/backend-search-bot
 
 go 1.18
 
