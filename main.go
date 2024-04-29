@@ -37,7 +37,7 @@ func main() {
     http.Handle("/process", corsHandler(router))
     http.Handle("/", corsHandler(router))
 
-    log.Fatal(http.ListenAndServe(":8080", router))
+    log.Fatal(http.ListenAndServe(":5555", router))
 }
 
 func Greetings(w http.ResponseWriter, r *http.Request) {
