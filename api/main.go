@@ -32,7 +32,7 @@ func main() {
     corsHandler := handlers.CORS(
         handlers.AllowedHeaders([]string{"Content-Type", "X-Requested-With", "Authorization"}),
         handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
-        handlers.AllowedOrigins([]string{"*"}), // Allow requests from any origin
+        handlers.AllowedOrigins([]string{"*"}), // Allow receive requests from any origin
     )
 
     // Wrap your router with the CORS middleware
