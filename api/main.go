@@ -1,5 +1,5 @@
-package handler
-// package main
+package main
+// package handler
 //package handler  TO VERCEL
 
 import (
@@ -27,7 +27,7 @@ func main() {
 
     // Register the handler for the "/process" endpoint with Gorilla Mux
     router.HandleFunc("/process", HandleProcessRequest).Methods(http.MethodPost, http.MethodOptions)
-    router.HandleFunc("/", Greetings).Methods("GET")
+    router.HandleFunc("/greetings", Greetings).Methods("GET")
 
     corsHandler := handlers.CORS(
         handlers.AllowedHeaders([]string{"Content-Type", "X-Requested-With", "Authorization"}),
