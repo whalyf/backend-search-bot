@@ -30,7 +30,7 @@ func main() {
     router.HandleFunc("/", Greetings).Methods("GET")
 
     corsHandler := handlers.CORS(
-        handlers.AllowedHeaders([]string{"Content-Type", "X-Requested-With", "Authorization"}),
+        handlers.AllowedHeaders([]string{"Content-Type", "Accept" "X-Requested-With", "Authorization"}),
         handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
         handlers.AllowedOrigins([]string{"*"}), // Allow receive requests from any origin
     )
