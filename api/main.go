@@ -1,6 +1,6 @@
-package handler
+package main
+// package handler
 //package handler  TO VERCEL
-//package main  TO LOCAL DEV
 
 import (
     "encoding/json"
@@ -26,11 +26,11 @@ func main() {
 		}
 
     // Register the handler for the "/process" endpoint with Gorilla Mux
-    router.HandleFunc("/process", HandleProcessRequest).Methods("POST")
+    router.HandleFunc("/process", HandleProcessRequest).Methods(http.MethodPost, http.MethodOptions)
     router.HandleFunc("/", Greetings).Methods("GET")
 
     corsHandler := handlers.CORS(
-        handlers.AllowedHeaders([]string{"Content-Type"}),
+        handlers.AllowedHeaders([]string{"Content-Type", "X-Requested-With", "Authorization"}),
         handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
         handlers.AllowedOrigins([]string{"*"}), // Allow requests from any origin
     )
@@ -39,11 +39,11 @@ func main() {
     http.Handle("/process", corsHandler(router))
     http.Handle("/", corsHandler(router))
 
-    log.Fatal(http.ListenAndServe(":5555", router))
+    log.Fatal(http.ListenAndServe(":5555", corsHandler(router)))
 }
 
 func Greetings(w http.ResponseWriter, r *http.Request) {
-  fmt. Fprintf(w, "<div><h1>Welcome to Google Digger GolangApi</h1><span>Código Fonte: <a target='_blank' href='https://github.com/whalyf/backend-search-bot'>Aqui!</a></span></div>")
+  fmt.Fprintf(w, "<div><h1>Welcome to Google Digger GolangApi</h1><span>Código Fonte: <a target='_blank' href='https://github.com/whalyf/backend-search-bot'>Aqui!</a></span></div>")
 }
 
 func HandleProcessRequest(w http.ResponseWriter, r *http.Request) {
@@ -75,6 +75,7 @@ func HandleProcessRequest(w http.ResponseWriter, r *http.Request) {
     sendEmail(email, htmlFormat)
 
     w.Header().Set("Content-Type", "application/json")
+    w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173/")
     json.NewEncoder(w).Encode(searchResult)
 }
 
