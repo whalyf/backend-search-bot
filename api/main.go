@@ -1,5 +1,5 @@
-package main
-// package handler
+package handler
+// package main
 //package handler  TO VERCEL
 
 import (
@@ -73,9 +73,6 @@ func HandleProcessRequest(w http.ResponseWriter, r *http.Request) {
 
     // EMAIL ENVIADO COM O HTMLJSON DA BUSCA
     sendEmail(email, htmlFormat)
-
-    w.Header().Set("Content-Type", "application/json")
-    w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173/")
     json.NewEncoder(w).Encode(searchResult)
 }
 
