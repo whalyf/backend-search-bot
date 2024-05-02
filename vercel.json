@@ -5,6 +5,12 @@
       "GO_BUILD_FLAGS": "-ldflags '-s -w'"
     }
   },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/process"
+    }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",
