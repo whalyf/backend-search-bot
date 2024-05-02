@@ -11,53 +11,52 @@ import (
 		"fmt"
 		"os"
 
+    "github.com/gorilla/mux"
 		"github.com/joho/godotenv"
     "github.com/resend/resend-go/v2"
 		g "github.com/serpapi/google-search-results-golang"
 )
 
+func HandleProcessRequest(w http.ResponseWriter, r *http.Request) {
+  var searchParams map[string]interface{}
+  err := json.NewDecoder(r.Body).Decode(&searchParams)
+  if err != nil {
+      http.Error(w, err.Error(), http.StatusBadRequest)
+      return
+  }
+
+  processedResults := processNestJSData(searchParams)
+  keywords, ok := processedResults["keywords"].(string)
+  if !ok {
+      http.Error(w, "Keywords not found", http.StatusInternalServerError)
+      return
+  }
+
+  email, ok := processedResults["email"].(string)
+  if !ok {
+      http.Error(w, "Email not found", http.StatusInternalServerError)
+      return
+  }
+  // BUSCA É INVOCADA UTILIZANDO SERP_API
+  searchResult := searchOnGoogle(keywords)
+  // JSON DE RESPOSTA É CONVERTIDO EM HTML
+  htmlFormat := prettyPrintHTML(searchResult)
+
+  // EMAIL ENVIADO COM O HTMLJSON DA BUSCA
+  sendEmail(email, htmlFormat)
+  json.NewEncoder(w).Encode(searchResult)
+}
+
 func main() {
+    router := mux.NewRouter()
+
 		if err := godotenv.Load(); err != nil {
 			log.Fatalf("Error loading .env file: %v", err)
 		}
 
-    http.HandleFunc("/process", HandleProcessRequest)
-
-    log.Fatal(http.ListenAndServe(":5555", nil))
-}
-
-// func Greetings(w http.ResponseWriter, r *http.Request) {
-//   fmt.Fprintf(w, "<div><h1>Welcome to Google Digger GolangApi</h1><span>Código Fonte: <a target='_blank' href='https://github.com/whalyf/backend-search-bot'>Aqui!</a></span></div>")
-// }
-
-func HandleProcessRequest(w http.ResponseWriter, r *http.Request) {
-    var searchParams map[string]interface{}
-    err := json.NewDecoder(r.Body).Decode(&searchParams)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return
-    }
-
-    processedResults := processNestJSData(searchParams)
-		keywords, ok := processedResults["keywords"].(string)
-		if !ok {
-				http.Error(w, "Keywords not found", http.StatusInternalServerError)
-				return
-		}
-
-		email, ok := processedResults["email"].(string)
-		if !ok {
-				http.Error(w, "Email not found", http.StatusInternalServerError)
-				return
-		}
-    // BUSCA É INVOCADA UTILIZANDO SERP_API
-    searchResult := searchOnGoogle(keywords)
-    // JSON DE RESPOSTA É CONVERTIDO EM HTML
-    htmlFormat := prettyPrintHTML(searchResult)
-
-    // EMAIL ENVIADO COM O HTMLJSON DA BUSCA
-    sendEmail(email, htmlFormat)
-    json.NewEncoder(w).Encode(searchResult)
+    //  Register the handler for the "/process" endpoint with Gorilla Mux
+    router.HandleFunc("/", HandleProcessRequest).Methods("POST")
+    log.Fatal(http.ListenAndServe(":5555", router))
 }
 
 func sendEmail(email string, prettyJSON string) {
