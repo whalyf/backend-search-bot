@@ -46,10 +46,6 @@ func main() {
     // log.Fatal(http.ListenAndServe(":5555", router))
 }
 
-func Greetings(w http.ResponseWriter, r *http.Request) {
-  fmt.Fprintf(w, "<div><h1>Welcome to Google Digger GolangApi</h1><span>Código Fonte: <a target='_blank' href='https://github.com/whalyf/backend-search-bot'>Aqui!</a></span></div>")
-}
-
 func HandleProcessRequest(w http.ResponseWriter, r *http.Request) {
     var searchParams map[string]interface{}
     err := json.NewDecoder(r.Body).Decode(&searchParams)
@@ -78,6 +74,10 @@ func HandleProcessRequest(w http.ResponseWriter, r *http.Request) {
     // EMAIL ENVIADO COM O HTMLJSON DA BUSCA
     sendEmail(email, htmlFormat)
     json.NewEncoder(w).Encode(searchResult)
+}
+
+func Greetings(w http.ResponseWriter, r *http.Request) {
+  fmt.Fprintf(w, "<div><h1>Welcome to Google Digger GolangApi</h1><span>Código Fonte: <a target='_blank' href='https://github.com/whalyf/backend-search-bot'>Aqui!</a></span></div>")
 }
 
 func sendEmail(email string, prettyJSON string) {
