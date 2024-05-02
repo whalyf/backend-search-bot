@@ -8,55 +8,76 @@ import (
     "net/http"
     "strings"
     "time"
-		"fmt"
-		"os"
+        "fmt"
+        "os"
 
+    // "github.com/gorilla/handlers"
     "github.com/gorilla/mux"
-		"github.com/joho/godotenv"
+        "github.com/joho/godotenv"
     "github.com/resend/resend-go/v2"
-		g "github.com/serpapi/google-search-results-golang"
+        g "github.com/serpapi/google-search-results-golang"
 )
-
-func HandleProcessRequest(w http.ResponseWriter, r *http.Request) {
-  var searchParams map[string]interface{}
-  err := json.NewDecoder(r.Body).Decode(&searchParams)
-  if err != nil {
-      http.Error(w, err.Error(), http.StatusBadRequest)
-      return
-  }
-
-  processedResults := processNestJSData(searchParams)
-  keywords, ok := processedResults["keywords"].(string)
-  if !ok {
-      http.Error(w, "Keywords not found", http.StatusInternalServerError)
-      return
-  }
-
-  email, ok := processedResults["email"].(string)
-  if !ok {
-      http.Error(w, "Email not found", http.StatusInternalServerError)
-      return
-  }
-  // BUSCA É INVOCADA UTILIZANDO SERP_API
-  searchResult := searchOnGoogle(keywords)
-  // JSON DE RESPOSTA É CONVERTIDO EM HTML
-  htmlFormat := prettyPrintHTML(searchResult)
-
-  // EMAIL ENVIADO COM O HTMLJSON DA BUSCA
-  sendEmail(email, htmlFormat)
-  json.NewEncoder(w).Encode(searchResult)
-}
 
 func main() {
     router := mux.NewRouter()
 
-		if err := godotenv.Load(); err != nil {
-			log.Fatalf("Error loading .env file: %v", err)
-		}
+        if err := godotenv.Load(); err != nil {
+            log.Fatalf("Error loading .env file: %v", err)
+        }
 
-    //  Register the handler for the "/process" endpoint with Gorilla Mux
-    router.HandleFunc("/", HandleProcessRequest).Methods("POST")
+    // Register the handler for the "/process" endpoint with Gorilla Mux
+    router.HandleFunc("/process", HandleProcessRequest).Methods("POST")
+    router.HandleFunc("/hello", Greetings).Methods("GET")
+
+    // corsHandler := handlers.CORS(
+    //     handlers.AllowedHeaders([]string{"Content-Type", "Accept", "X-Requested-With", "Authorization"}),
+    //     handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+    //     handlers.AllowedOrigins([]string{"*"}), // Allow receive requests from any origin
+    // )
+
+    // // Wrap your router with the CORS middleware
+    // http.Handle("/", corsHandler(router))
+    // http.Handle("/hello", corsHandler(router))
+
+    // log.Fatal(http.ListenAndServe(":5555", corsHandler(router)))
+
+    http.Handle("/process", router)
+    http.Handle("/hello", router)
     log.Fatal(http.ListenAndServe(":5555", router))
+}
+
+func Greetings(w http.ResponseWriter, r *http.Request) {
+  fmt.Fprintf(w, "<div><h1>Welcome to Google Digger GolangApi</h1><span>Código Fonte: <a target='_blank' href='https://github.com/whalyf/backend-search-bot'>Aqui!</a></span></div>")
+}
+
+func HandleProcessRequest(w http.ResponseWriter, r *http.Request) {
+    var searchParams map[string]interface{}
+    err := json.NewDecoder(r.Body).Decode(&searchParams)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
+
+    processedResults := processNestJSData(searchParams)
+        keywords, ok := processedResults["keywords"].(string)
+        if !ok {
+                http.Error(w, "Keywords not found", http.StatusInternalServerError)
+                return
+        }
+
+        email, ok := processedResults["email"].(string)
+        if !ok {
+                http.Error(w, "Email not found", http.StatusInternalServerError)
+                return
+        }
+    // BUSCA É INVOCADA UTILIZANDO SERP_API
+    searchResult := searchOnGoogle(keywords)
+    // JSON DE RESPOSTA É CONVERTIDO EM HTML
+    htmlFormat := prettyPrintHTML(searchResult)
+
+    // EMAIL ENVIADO COM O HTMLJSON DA BUSCA
+    sendEmail(email, htmlFormat)
+    json.NewEncoder(w).Encode(searchResult)
 }
 
 func sendEmail(email string, prettyJSON string) {
@@ -94,7 +115,7 @@ func prettyPrintHTML(data interface{}) string {
 }
 
 func searchOnGoogle(keywords string) map[string]interface{}{
-	parameter := map[string]string{
+    parameter := map[string]string{
     "api_key": os.Getenv("SERPAPI_KEY"),
     "engine": "google",
     "q": keywords,
@@ -106,8 +127,8 @@ func searchOnGoogle(keywords string) map[string]interface{}{
   search := g.NewGoogleSearch(parameter, os.Getenv("SERPAPI_KEY"))
   results, err := search.GetJSON()
 
-	fmt.Println(err)
-	return results
+    fmt.Println(err)
+    return results
 }
 
 func processNestJSData(searchParams map[string]interface{}) map[string]interface{} {
