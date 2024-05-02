@@ -11,31 +11,31 @@ import (
 		"fmt"
 		"os"
 
-    "github.com/gorilla/mux"
+    // "github.com/gorilla/mux"
 		"github.com/joho/godotenv"
     "github.com/resend/resend-go/v2"
 		g "github.com/serpapi/google-search-results-golang"
 )
 
 func main() {
-    router := mux.NewRouter()
+    // router := mux.NewRouter()
 
 		if err := godotenv.Load(); err != nil {
 			log.Fatalf("Error loading .env file: %v", err)
 		}
 
     //  Register the handler for the "/process" endpoint with Gorilla Mux
-     router.HandleFunc("/process", HandleProcessRequest).Methods("POST")
-     router.HandleFunc("/hello", Greetings).Methods("GET")
+     http.HandleFunc("/process", HandleProcessRequest).Methods("POST")
+    //  router.HandleFunc("/hello", Greetings).Methods("GET")
 
-     http.Handle("/", router)
+    //  http.Handle("/", router)
 
      log.Fatal(http.ListenAndServe(":5555", nil))
 }
 
-func Greetings(w http.ResponseWriter, r *http.Request) {
-  fmt.Fprintf(w, "<div><h1>Welcome to Google Digger GolangApi</h1><span>Código Fonte: <a target='_blank' href='https://github.com/whalyf/backend-search-bot'>Aqui!</a></span></div>")
-}
+// func Greetings(w http.ResponseWriter, r *http.Request) {
+//   fmt.Fprintf(w, "<div><h1>Welcome to Google Digger GolangApi</h1><span>Código Fonte: <a target='_blank' href='https://github.com/whalyf/backend-search-bot'>Aqui!</a></span></div>")
+// }
 
 func HandleProcessRequest(w http.ResponseWriter, r *http.Request) {
     var searchParams map[string]interface{}
