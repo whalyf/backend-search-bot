@@ -11,7 +11,6 @@ import (
 		"fmt"
 		"os"
 
-    // "github.com/gorilla/handlers"
     "github.com/gorilla/mux"
 		"github.com/joho/godotenv"
     "github.com/resend/resend-go/v2"
@@ -25,25 +24,13 @@ func main() {
 			log.Fatalf("Error loading .env file: %v", err)
 		}
 
-    // Register the handler for the "/process" endpoint with Gorilla Mux
-    router.HandleFunc("/process", HandleProcessRequest).Methods("POST")
-    router.HandleFunc("/hello", Greetings).Methods("GET")
+    //  Register the handler for the "/process" endpoint with Gorilla Mux
+     router.HandleFunc("/process", HandleProcessRequest).Methods("POST")
+     router.HandleFunc("/hello", Greetings).Methods("GET")
 
-    // corsHandler := handlers.CORS(
-    //     handlers.AllowedHeaders([]string{"Content-Type", "Accept", "X-Requested-With", "Authorization"}),
-    //     handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
-    //     handlers.AllowedOrigins([]string{"*"}), // Allow receive requests from any origin
-    // )
+     http.Handle("/", router)
 
-    // // Wrap your router with the CORS middleware
-    // http.Handle("/", corsHandler(router))
-    // http.Handle("/hello", corsHandler(router))
-
-    // log.Fatal(http.ListenAndServe(":5555", corsHandler(router)))
-
-    http.Handle("/process", router)
-    http.Handle("/hello", router)
-    log.Fatal(http.ListenAndServe(":5555", router))
+     log.Fatal(http.ListenAndServe(":5555", nil))
 }
 
 func Greetings(w http.ResponseWriter, r *http.Request) {
