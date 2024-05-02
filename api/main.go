@@ -1,5 +1,5 @@
-package handler
-// package main
+package main
+// package handler
 //package handler  TO VERCEL
 
 import (
@@ -11,7 +11,7 @@ import (
 		"fmt"
 		"os"
 
-    // "github.com/gorilla/handlers"
+    "github.com/gorilla/handlers"
     "github.com/gorilla/mux"
 		"github.com/joho/godotenv"
     "github.com/resend/resend-go/v2"
@@ -27,28 +27,28 @@ func main() {
 
     // Register the handler for the "/process" endpoint with Gorilla Mux
     router.HandleFunc("/process", HandleProcessRequest).Methods("POST")
-    router.HandleFunc("/hello", Greetings).Methods("GET")
+    // router.HandleFunc("/hello", Greetings).Methods("GET")
 
-    // corsHandler := handlers.CORS(
-    //     handlers.AllowedHeaders([]string{"Content-Type", "Accept", "X-Requested-With", "Authorization"}),
-    //     handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
-    //     handlers.AllowedOrigins([]string{"*"}), // Allow receive requests from any origin
-    // )
+    corsHandler := handlers.CORS(
+        handlers.AllowedHeaders([]string{"Content-Type", "Accept", "X-Requested-With", "Authorization"}),
+        handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+        handlers.AllowedOrigins([]string{"*"}), // Allow receive requests from any origin
+    )
 
-    // // Wrap your router with the CORS middleware
-    // http.Handle("/", corsHandler(router))
+    //LOCAL CORS HANDLER
+    http.Handle("/process", corsHandler(router))
     // http.Handle("/hello", corsHandler(router))
+    log.Fatal(http.ListenAndServe(":5555", corsHandler(router)))
 
-    // log.Fatal(http.ListenAndServe(":5555", corsHandler(router)))
-
-    http.Handle("/process", router)
-    http.Handle("/hello", router)
-    log.Fatal(http.ListenAndServe(":5555", router))
+    
+    // http.Handle("/hello", router)
+    // http.Handle("/process", router)
+    // log.Fatal(http.ListenAndServe(":5555", router))
 }
 
-func Greetings(w http.ResponseWriter, r *http.Request) {
-  fmt.Fprintf(w, "<div><h1>Welcome to Google Digger GolangApi</h1><span>Código Fonte: <a target='_blank' href='https://github.com/whalyf/backend-search-bot'>Aqui!</a></span></div>")
-}
+// func Greetings(w http.ResponseWriter, r *http.Request) {
+//   fmt.Fprintf(w, "<div><h1>Welcome to Google Digger GolangApi</h1><span>Código Fonte: <a target='_blank' href='https://github.com/whalyf/backend-search-bot'>Aqui!</a></span></div>")
+// }
 
 func HandleProcessRequest(w http.ResponseWriter, r *http.Request) {
     var searchParams map[string]interface{}
