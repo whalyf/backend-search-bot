@@ -26,8 +26,8 @@ func main() {
 		}
 
     // Register the handler for the "/process" endpoint with Gorilla Mux
-    router.HandleFunc("/process", HandleProcessRequest).Methods("POST")
-    router.HandleFunc("/", Greetings).Methods("GET")
+    router.HandleFunc("/", HandleProcessRequest).Methods("POST")
+    router.HandleFunc("/hello", Greetings).Methods("GET")
 
     corsHandler := handlers.CORS(
         handlers.AllowedHeaders([]string{"Content-Type", "Accept", "X-Requested-With", "Authorization"}),
@@ -36,8 +36,8 @@ func main() {
     )
 
     // Wrap your router with the CORS middleware
-    http.Handle("/process", corsHandler(router))
     http.Handle("/", corsHandler(router))
+    http.Handle("/hello", corsHandler(router))
 
     log.Fatal(http.ListenAndServe(":5555", corsHandler(router)))
 
