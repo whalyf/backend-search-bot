@@ -1,5 +1,5 @@
-package handler
-// package main
+package main
+// package handler
 //package handler  TO VERCEL
 
 import (
@@ -11,7 +11,7 @@ import (
 		"fmt"
 		"os"
 
-    // "github.com/gorilla/handlers"
+    "github.com/gorilla/handlers"
     "github.com/gorilla/mux"
 		"github.com/joho/godotenv"
     "github.com/resend/resend-go/v2"
@@ -26,24 +26,24 @@ func main() {
 		}
 
     // Register the handler for the "/process" endpoint with Gorilla Mux
-    router.HandleFunc("/process", HandleProcessRequest).Methods(http.MethodPost, http.MethodOptions)
+    router.HandleFunc("/process", HandleProcessRequest).Methods("POST")
     router.HandleFunc("/", Greetings).Methods("GET")
 
-    // corsHandler := handlers.CORS(
-    //     handlers.AllowedHeaders([]string{"Content-Type", "Accept", "X-Requested-With", "Authorization"}),
-    //     handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
-    //     handlers.AllowedOrigins([]string{"*"}), // Allow receive requests from any origin
-    // )
+    corsHandler := handlers.CORS(
+        handlers.AllowedHeaders([]string{"Content-Type", "Accept", "X-Requested-With", "Authorization"}),
+        handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+        handlers.AllowedOrigins([]string{"*"}), // Allow receive requests from any origin
+    )
 
-    // // Wrap your router with the CORS middleware
-    // http.Handle("/process", corsHandler(router))
-    // http.Handle("/", corsHandler(router))
+    // Wrap your router with the CORS middleware
+    http.Handle("/process", corsHandler(router))
+    http.Handle("/", corsHandler(router))
 
-    // log.Fatal(http.ListenAndServe(":5555", corsHandler(router)))
-    http.Handle("/process", router)
-    http.Handle("/", router)
+    log.Fatal(http.ListenAndServe(":5555", corsHandler(router)))
 
-    log.Fatal(http.ListenAndServe(":5555", router))
+    // http.Handle("/process", router)
+    // http.Handle("/", router)
+    // log.Fatal(http.ListenAndServe(":5555", router))
 }
 
 func Greetings(w http.ResponseWriter, r *http.Request) {
